@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos Recolectados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            background-image: url('PHOTO-2024-12-27-14-25-35.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            color: #C0C0C0;
+            margin: 0;
+            min-height: 100vh;
+            height: 100%;
+        }
+        h2 {
+            text-align: center;
+            color: #C0C0C0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #444;
+        }
+        .no-data {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            margin-top: 20px;
+        }
+        .button {
+            padding: 8px 12px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #666;
+        }
+        .gold {
+            background-color: gold;
+            color: black;
+            font-weight: bold;
+        }
+        .icon {
+            width: 40px;
+            height: 40px;
+            vertical-align: middle;
+        }
+        .number-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .balas-container img {
+            margin-right: 5px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h2>Datos Recolectados</h2>
+    <div id="no-data-message" class="no-data"></div>
+    <table id="tabla-datos-container" style="display: none;">
+        <thead>
+            <tr>
+                <th>Formulario</th>
+                <th>Nombre</th>
+                <th>Apellido Paterno</th>
+                <th>Apellido Materno</th>
+                <th>Fecha de Cumpleaños</th>
+                <th>WhatsApp</th>
+                <th>Correo</th>
+                <th>Ciudad</th>
+                <th>Servicio</th>
+                <th>Cantidad de Servicio</th>
+                <th>Transporte</th>
+                <th>Cantidad de Transporte</th>
+                <th>Fecha</th>
+                <th>Horas</th>
+                <th>Referencia</th>
+                <th>Récord de Balas</th>
+                <th>Actualizar Pedido</th>
+                <th>Borrar Cliente</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-datos">
+            <!-- Los datos se cargarán dinámicamente -->
+        </tbody>
+    </table>
+
+    <button class="button" onclick="exportarAExcel()">Exportar a Excel</button>
+
+    <script>
+        const datosGuardados = JSON.parse(localStorage.getItem('datosFormularios')) || [];
+        const tablaContainer = document.getElementById('tabla-datos-container');
+        const tabla = document.getElementById('tabla-datos');
+        const noDataMessage = document.getElementById('no-data-message');
+        const balaImg = '<img src="bala.png" alt="Bala" class="icon">';
+
+        if (datosGuardados.length > 0) {
+            noDataMessage.style.display = 'none';
+            tablaContainer.style.display = 'table';
+
+            datosGuardados.forEach((dato, index) => {
+                const fila = document.createElement('tr');
+                const referencia = dato.referencia
+                    ? `${dato.referencia.nombre || 'N/A'} ${dato.referencia.apellidoPaterno || ''} ${dato.referencia.apellidoMaterno || ''}`.trim()
+                    : 'N/A';
+
+                let balasSeleccionadas = '';
+                for (let i = 0; i < (dato.recordBalas || 0); i++) {
+                    balasSeleccionadas += balaImg;
+                }
+
+                fila.innerHTML = `
+                    <td>${dato.formulario}</td>
+                    <td>${dato.nombre}</td>
+                    <td>${dato.apellidoPaterno}</td>
+                    <td>${dato.apellidoMaterno}</td>
+                    <td><input type="date" value="${dato.fechaCumpleanos || ''}" onchange="actualizarFechaCumpleanos(${index}, this)"></td>
+                    <td>${dato.whatsapp}</td>
+                    <td>${dato.correo}</td>
+                    <td>${dato.ciudad}</td>
+                    <td>
+                        <select onchange="actualizarServicio(${index}, this)">
+                            ${['Ninguno 🛑', 'Choferes 🚗', 'Auto Escolta 🚓', 'Escolta Armado Arma Corta 🔫', 'Escolta Armado Arma Larga 👮‍♂️', 'Escolta Táctico 👮‍♂️', 'Escolta Elite 🕴️', 'Escolta Armado Arma Corta y Larga 🔫👮‍♂️']
+                                .map(opcion => `<option value="${opcion}" ${opcion === dato.servicio ? 'selected' : ''}>${opcion}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="number-cell">${balaImg}<input type="number" value="${dato.cantidadServicio || ''}" onchange="actualizarCantidadServicio(${index}, this)"></td>
+                    <td>
+                        <select onchange="actualizarTransporte(${index}, this)">
+                            ${['Ninguno 🛑', 'Camioneta Línea Anterior 🚙', 'Camioneta Línea Nueva 🚙', 'Camioneta Blindada 🚙🛡️', 'Helicóptero 🚁']
+                                .map(opcion => `<option value="${opcion}" ${opcion === dato.transporte ? 'selected' : ''}>${opcion}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="number-cell">${balaImg}<input type="number" value="${dato.cantidadTransporte || ''}" onchange="actualizarCantidadTransporte(${index}, this)"></td>
+                    <td>
+                        <input type="date" value="${dato.fechaInicio || ''}" onchange="actualizarFechaInicio(${index}, this)"> 
+                        a 
+                        <input type="date" value="${dato.fechaFin || ''}" onchange="actualizarFechaFin(${index}, this)">
+                    </td>
+                    <td><input type="number" value="${dato.horas || ''}" onchange="actualizarHoras(${index}, this)"></td>
+                    <td>${referencia}</td>
+                    <td class="number-cell">
+                        <select onchange="actualizarRecordBalas(${index}, this)">
+                            ${Array.from({length: 11}, (_, i) => `<option value="${i}" ${i === (dato.recordBalas || 0) ? 'selected' : ''}>${i}</option>`).join('')}
+                        </select>
+                        <div id="balas-${index}" class="balas-container">${balasSeleccionadas}</div>
+                    </td>
+                    <td><button class="button" onclick="actualizarPedido(${index}, this)">Actualizar Pedido</button></td>
+                    <td><button class="button" onclick="confirmarBorrarCliente(${index})">Borrar Cliente</button></td>
+                `;
+
+                if (dato.dorado) {
+                    fila.classList.add('gold');
+                }
+
+                tabla.appendChild(fila);
+            });
+        } else {
+            noDataMessage.textContent = 'No hay datos disponibles.';
+        }
+
+        function actualizarFechaCumpleanos(index, input) {
+            datosGuardados[index].fechaCumpleanos = input.value;
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+        }
+
+        function actualizarFechaInicio(index, input) {
+            datosGuardados[index].fechaInicio = input.value;
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+        }
+
+        function actualizarFechaFin(index, input) {
+            datosGuardados[index].fechaFin = input.value;
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+        }
+
+        function actualizarHoras(index, input) {
+            datosGuardados[index].horas = input.value;
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+        }
+
+        function actualizarServicio(index, select) {
+            datosGuardados[index].servicio = select.value;
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+        }
+
+        function actualizarCantidadServicio(index, input) {
+            datosGuardados[index].cantidadServicio = input.value;
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+        }
+
+        function actualizarTransporte(index, select) {
+            datosGuardados[index].transporte = select.value;
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+        }
+
+        function actualizarCantidadTransporte(index, input) {
+            datosGuardados[index].cantidadTransporte = input.value;
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+        }
+
+        function actualizarRecordBalas(index, select) {
+            const nuevaCantidad = parseInt(select.value);
+            datosGuardados[index].recordBalas = nuevaCantidad;
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+            const contenedorBalas = document.getElementById(`balas-${index}`);
+            contenedorBalas.innerHTML = '';
+            for (let i = 0; i < nuevaCantidad; i++) {
+                contenedorBalas.innerHTML += balaImg;
+            }
+        }
+
+        function actualizarPedido(index) {
+            alert(`Pedido ${datosGuardados[index].formulario} actualizado.`);
+            const fila = tabla.rows[index + 1]; // +1 to account for the header row
+            datosGuardados[index].dorado = true;
+            fila.classList.add('gold');
+            localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+        }
+
+        function confirmarBorrarCliente(index) {
+            if (confirm(`¿Estás seguro de que deseas eliminar el cliente ${datosGuardados[index].nombre}?`)) {
+                datosGuardados.splice(index, 1);
+                localStorage.setItem('datosFormularios', JSON.stringify(datosGuardados));
+                location.reload();
+            }
+        }
+
+        function exportarAExcel() {
+            const tablaData = datosGuardados.map(dato => [
+                dato.formulario, dato.nombre, dato.apellidoPaterno, dato.apellidoMaterno,
+                dato.fechaCumpleanos, dato.whatsapp, dato.correo, dato.ciudad, dato.servicio,
+                dato.cantidadServicio, dato.transporte, dato.cantidadTransporte, dato.fechaInicio + ' a ' + dato.fechaFin,
+                dato.horas, `${dato.referencia?.nombre || ''} ${dato.referencia?.apellidoPaterno || ''} ${dato.referencia?.apellidoMaterno || ''}`.trim(),
+                dato.recordBalas
+            ]);
+
+            const ws = XLSX.utils.aoa_to_sheet([[
+                'Formulario', 'Nombre', 'Apellido Paterno', 'Apellido Materno', 'Fecha de Cumpleaños', 'WhatsApp', 'Correo', 'Ciudad',
+                'Servicio', 'Cantidad de Servicio', 'Transporte', 'Cantidad de Transporte', 'Fecha', 'Horas', 'Referencia', 'Récord de Balas'
+            ], ...tablaData]);
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+            XLSX.writeFile(wb, 'datos_recolectados.xlsx');
+        }
+    </script>
+</body>
+</html>

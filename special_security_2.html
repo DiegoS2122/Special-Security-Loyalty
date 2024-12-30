@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special Security Premier 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: black;
+            color: #C0C0C0;
+        }
+        .logo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 100px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #222;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            text-align: center;
+            flex-grow: 1;
+            margin: 0;
+        }
+        .language-container {
+            margin-left: 20px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input, select {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+            width: calc(100% - 22px);
+            background-color: #333;
+            color: #C0C0C0;
+            border: 1px solid #555;
+            border-radius: 5px;
+        }
+        .submit-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: #C0C0C0;
+            font-size: 18px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .submit-button img {
+            width: 30px;
+            height: 30px;
+        }
+        .submit-button:hover {
+            background-color: #444;
+        }
+    </style>
+    <script>
+        function guardarDatos(event, formulario) {
+            event.preventDefault();
+
+            const datos = {
+                formulario: formulario,
+                nombre: document.getElementById('nombre').value,
+                apellidoPaterno: document.getElementById('apellidoPaterno').value,
+                apellidoMaterno: document.getElementById('apellidoMaterno').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                correo: document.getElementById('correo').value,
+                ciudad: document.getElementById('ciudad').value,
+                fechaInicio: document.getElementById('fechaInicio').value,
+                fechaFin: document.getElementById('fechaFin').value,
+                fechaCumpleanos: document.getElementById('fechaCumpleanos').value,
+                horasServicio: document.getElementById('horasServicio').value,
+                referencia: {
+                    nombre: document.getElementById('referenciaNombre').value,
+                    apellidoPaterno: document.getElementById('referenciaApellidoPaterno').value,
+                    apellidoMaterno: document.getElementById('referenciaApellidoMaterno').value,
+                }
+            };
+
+            // Guardar datos en localStorage
+            const datosExistentes = JSON.parse(localStorage.getItem('datosFormularios')) || [];
+            datosExistentes.push(datos);
+            localStorage.setItem('datosFormularios', JSON.stringify(datosExistentes));
+
+            // Construir el mensaje de WhatsApp
+            const mensaje = `
+                Nuevo formulario enviado:
+                - Nombre: ${datos.nombre} ${datos.apellidoPaterno} ${datos.apellidoMaterno}
+                - WhatsApp: ${datos.whatsapp}
+                - Correo: ${datos.correo}
+                - Ciudad: ${datos.ciudad}
+                - Fechas: ${datos.fechaInicio} a ${datos.fechaFin}
+                - Cumpleaños: ${datos.fechaCumpleanos}
+                - Horas Servicio: ${datos.horasServicio}
+                - Referencia: ${datos.referencia.nombre} ${datos.referencia.apellidoPaterno} ${datos.referencia.apellidoMaterno}
+            `.trim();
+
+            // Enviar el mensaje a los dos números de WhatsApp
+            enviarWhatsApp('5548995961', mensaje);
+            enviarWhatsApp('5553670763', mensaje);
+
+            alert('Datos guardados correctamente y enviados a WhatsApp.');
+            document.getElementById('formulario').reset();
+        }
+
+        function enviarWhatsApp(numero, mensaje) {
+            const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</head>
+<body>
+
+<div class="form-container">
+    <div class="form-header">
+        <img src="IMG_1414.jpg" alt="Logo" class="logo">
+        <h2>Special Security Premier 2</h2>
+        <div class="language-container">
+            <label for="language">Seleccionar Idioma:</label>
+            <select id="language" onchange="changeLanguage()">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+    </div>
+
+    <form id="formulario" onsubmit="guardarDatos(event, 'Formulario 2')">
+        <label for="nombre">Nombre del Cliente:</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
+
+        <label for="apellidoPaterno">Apellido Paterno:</label>
+        <input type="text" id="apellidoPaterno" name="apellidoPaterno" placeholder="Apellido Paterno" required>
+
+        <label for="apellidoMaterno">Apellido Materno:</label>
+        <input type="text" id="apellidoMaterno" name="apellidoMaterno" placeholder="Apellido Materno" required>
+
+        <label for="whatsapp">Pon tu WhatsApp:</label>
+        <input type="text" id="whatsapp" name="whatsapp" placeholder="Número de WhatsApp" required>
+
+        <label for="correo">Correo Electrónico:</label>
+        <input type="email" id="correo" name="correo" placeholder="Correo Electrónico" required>
+
+        <label for="ciudad">Ciudad en la que radica:</label>
+        <input type="text" id="ciudad" name="ciudad" placeholder="Ciudad" required>
+
+        <label for="fechaInicio">Fecha de inicio del servicio:</label>
+        <input type="date" id="fechaInicio" name="fechaInicio" required>
+
+        <label for="fechaFin">Fecha de fin del servicio:</label>
+        <input type="date" id="fechaFin" name="fechaFin" required>
+
+        <label for="fechaCumpleanos">Fecha de Cumpleaños:</label>
+        <input type="date" id="fechaCumpleanos" name="fechaCumpleanos" required>
+
+        <label for="horasServicio">Cantidad de horas de servicio:</label>
+        <input type="number" id="horasServicio" name="horasServicio" placeholder="Horas de servicio" required>
+
+        <label for="referenciaNombre">Nombre de la Referencia:</label>
+        <input type="text" id="referenciaNombre" name="referenciaNombre" placeholder="Nombre de la referencia" required>
+        <input type="text" id="referenciaApellidoPaterno" name="referenciaApellidoPaterno" placeholder="Apellido Paterno" required>
+        <input type="text" id="referenciaApellidoMaterno" name="referenciaApellidoMaterno" placeholder="Apellido Materno" required>
+
+        <button type="submit" class="submit-button">
+            <img src="IMG_1414.jpg" alt="Logo"> Enviar
+        </button>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Datos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('PHOTO-2024-12-27-14-25-35.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #C0C0C0;
+            margin: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #C0C0C0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .button {
+            padding: 8px 12px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h2>Mis Datos</h2>
+    <table id="tabla-datos">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido Paterno</th>
+                <th>Apellido Materno</th>
+                <th>Correo</th>
+                <th>Ciudad</th>
+                <th>Récord de Balas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Aquí se cargarán los datos del cliente -->
+        </tbody>
+    </table>
+    <button class="button" onclick="cerrarSesion()">Cerrar sesión</button>
+
+    <script>
+        const datosGuardados = JSON.parse(localStorage.getItem("datosFormularios")) || [];
+        const usuarioCliente = localStorage.getItem("usuarioCliente");
+
+        // Verificar si hay sesión activa
+        if (!usuarioCliente) {
+            alert("No hay sesión activa. Redirigiendo a inicio de sesión...");
+            window.location.href = "index.html";
+        }
+
+        const clienteDatos = datosGuardados.filter(dato => dato.correo === usuarioCliente);
+
+        if (clienteDatos.length > 0) {
+            const tabla = document.getElementById("tabla-datos").getElementsByTagName('tbody')[0];
+            clienteDatos.forEach(dato => {
+                const fila = document.createElement("tr");
+
+                fila.innerHTML = `
+                    <td>${dato.nombre || "N/A"}</td>
+                    <td>${dato.apellidoPaterno || "N/A"}</td>
+                    <td>${dato.apellidoMaterno || "N/A"}</td>
+                    <td>${dato.correo || "N/A"}</td>
+                    <td>${dato.ciudad || "N/A"}</td>
+                    <td>${dato.recordBalas || "0"}</td>
+                `;
+
+                tabla.appendChild(fila);
+            });
+        } else {
+            alert("No se encontraron datos para este cliente.");
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem("usuarioCliente");
+            localStorage.removeItem("sesionActiva");
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

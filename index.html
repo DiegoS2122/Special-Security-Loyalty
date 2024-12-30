@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('PHOTO-2024-12-27-14-25-35.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #C0C0C0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: rgba(34, 34, 34, 0.9); /* Fondo semi-transparente */
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 300px;
+            text-align: center;
+        }
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #555;
+            border-radius: 3px;
+            background-color: #333;
+            color: white;
+        }
+        button {
+            background-color: #555;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #666;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <img src="IMG_1414.jpg" alt="Logo de la empresa" class="logo">
+        <h2 id="titulo">Inicio de Sesión</h2>
+        
+        <select id="idioma" onchange="cambiarIdioma()">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+        </select>
+        
+        <select id="tipoUsuario" onchange="toggleInputs()">
+            <option value="administrador">Administrador</option>
+            <option value="cliente">Cliente</option>
+        </select>
+        
+        <div id="adminInputs">
+            <input type="text" id="usuario" placeholder="Usuario">
+            <input type="password" id="contraseña" placeholder="Contraseña">
+        </div>
+
+        <div id="clienteInputs" style="display:none;">
+            <input type="email" id="correo" placeholder="Correo Electrónico">
+            <input type="text" id="whatsapp" placeholder="Número de WhatsApp">
+        </div>
+        
+        <button onclick="login()">Ingresar</button>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        const textos = {
+            es: {
+                titulo: "Inicio de Sesión",
+                administrador: "Administrador",
+                cliente: "Cliente",
+                usuario: "Usuario",
+                contraseña: "Contraseña",
+                correo: "Correo Electrónico",
+                whatsapp: "Número de WhatsApp",
+                ingresar: "Ingresar",
+                errorAdmin: "Usuario o contraseña incorrectos",
+                errorCliente: "Por favor, ingresa un correo y número de WhatsApp válidos"
+            },
+            en: {
+                titulo: "Login",
+                administrador: "Administrator",
+                cliente: "Client",
+                usuario: "Username",
+                contraseña: "Password",
+                correo: "Email Address",
+                whatsapp: "WhatsApp Number",
+                ingresar: "Log In",
+                errorAdmin: "Incorrect username or password",
+                errorCliente: "Please enter a valid email and WhatsApp number"
+            }
+        };
+
+        let idiomaActual = "es";
+
+        function cambiarIdioma() {
+            idiomaActual = document.getElementById("idioma").value;
+            const textosIdioma = textos[idiomaActual];
+
+            document.getElementById("titulo").textContent = textosIdioma.titulo;
+            document.getElementById("tipoUsuario").options[0].textContent = textosIdioma.administrador;
+            document.getElementById("tipoUsuario").options[1].textContent = textosIdioma.cliente;
+            document.getElementById("usuario").placeholder = textosIdioma.usuario;
+            document.getElementById("contraseña").placeholder = textosIdioma.contraseña;
+            document.getElementById("correo").placeholder = textosIdioma.correo;
+            document.getElementById("whatsapp").placeholder = textosIdioma.whatsapp;
+            document.querySelector("button").textContent = textosIdioma.ingresar;
+        }
+
+        const administradores = [
+            { usuario: "admin1", contraseña: "1234" },
+            { usuario: "admin2", contraseña: "abcd" }
+        ];
+
+        function toggleInputs() {
+            const tipoUsuario = document.getElementById("tipoUsuario").value;
+            if (tipoUsuario === "administrador") {
+                document.getElementById("adminInputs").style.display = "block";
+                document.getElementById("clienteInputs").style.display = "none";
+            } else {
+                document.getElementById("adminInputs").style.display = "none";
+                document.getElementById("clienteInputs").style.display = "block";
+            }
+        }
+
+        function login() {
+            const tipoUsuario = document.getElementById("tipoUsuario").value;
+            const error = document.getElementById("error");
+            const textosIdioma = textos[idiomaActual];
+
+            if (tipoUsuario === "administrador") {
+                const usuario = document.getElementById("usuario").value;
+                const contraseña = document.getElementById("contraseña").value;
+                const adminValido = administradores.find(a => a.usuario === usuario && a.contraseña === contraseña);
+
+                if (adminValido) {
+                    localStorage.setItem("sesionActiva", "true");
+                    window.location.href = "tabla.html";
+                } else {
+                    error.textContent = textosIdioma.errorAdmin;
+                }
+            } else {
+                const correo = document.getElementById("correo").value;
+                const whatsapp = document.getElementById("whatsapp").value;
+
+                if (correo && whatsapp) {
+                    localStorage.setItem("sesionActiva", "true");
+                    localStorage.setItem("usuarioCliente", correo);
+                    localStorage.setItem("whatsappCliente", whatsapp);
+                    window.location.href = "tabla_cliente.html";
+                } else {
+                    error.textContent = textosIdioma.errorCliente;
+                }
+            }
+        }
+
+        // Inicializar con el idioma por defecto
+        cambiarIdioma();
+    </script>
+</body>
+</html>
